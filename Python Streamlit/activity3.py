@@ -18,7 +18,7 @@ st.write("Point your camera at objects to identify them in real-time.")
 def video_frame_callback(frame):
     img = frame.to_ndarray(format="bgr24")
 
-    img = cv2.resize(img, (416, 416))
+    img = cv2.resize(img, (320, 320))
 
     results = model(img, conf=0.5, verbose=False)
 
@@ -53,13 +53,12 @@ def video_frame_callback(frame):
 RTC_CONFIGURATION = RTCConfiguration({
     "iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]
 })
-
-# WebRTC streamer (FIXED)
 webrtc_streamer(
     key="object-detection",
-    mode=WebRtcMode.SENDRECV,   
+    mode=WebRtcMode.SENDRECV,
     video_frame_callback=video_frame_callback,
     async_processing=True,
     rtc_configuration=RTC_CONFIGURATION,
     media_stream_constraints={"video": True, "audio": False},
+    async_send=True,  
 )
