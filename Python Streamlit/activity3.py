@@ -1,5 +1,5 @@
 import streamlit as st
-from streamlit_webrtc import webrtc_streamer, RTCConfiguration
+from streamlit_webrtc import webrtc_streamer, RTCConfiguration, WebRtcMode
 from ultralytics import YOLO
 import av
 import cv2
@@ -49,15 +49,15 @@ def video_frame_callback(frame):
     return av.VideoFrame.from_ndarray(annotated_frame, format="bgr24")
 
 
-# RTC config (important for stable connection)
+# RTC config
 RTC_CONFIGURATION = RTCConfiguration({
     "iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]
 })
 
-# Start WebRTC streamer
+# WebRTC streamer (FIXED)
 webrtc_streamer(
     key="object-detection",
-    mode="sendrecv", 
+    mode=WebRtcMode.SENDRECV,   
     video_frame_callback=video_frame_callback,
     async_processing=True,
     rtc_configuration=RTC_CONFIGURATION,
