@@ -4,8 +4,6 @@ from ultralytics import YOLO
 import av
 import cv2
 
-if not hasattr(st, "experimental_rerun"):
-    st.experimental_rerun = st.rerun
     
 @st.cache_resource
 def load_model():
