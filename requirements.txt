@@ -4,4 +4,4 @@ ultralytics
 opencv-python-headless
 numpy<2.0
 tornado==6.3.3
-lap>=0.5.12  requirement
+lap>=0.5.12
