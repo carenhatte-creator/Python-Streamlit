@@ -4,7 +4,6 @@ from ultralytics import YOLO
 import av
 import cv2
 
-# Cache the model
 @st.cache_resource
 def load_model():
     return YOLO("yolov8n.pt")
@@ -14,13 +13,11 @@ model = load_model()
 st.title("🎥 Live Object Detection & Tracing")
 st.write("Point your camera at objects to identify them in real-time.")
 
-# Video callback
+# 2. Video callback function
 def video_frame_callback(frame):
     img = frame.to_ndarray(format="bgr24")
 
-    img = cv2.resize(img, (320, 320))
-
-    results = model(img, conf=0.5, verbose=False)
+    results = model(img, conf=0.5, verbose=False, imgsz=320)
 
     annotated_frame = results[0].plot()
 
@@ -28,7 +25,6 @@ def video_frame_callback(frame):
 
     if results and results[0].boxes is not None:
         names = results[0].names
-
         for cls_id in results[0].boxes.cls.tolist():
             name = names[int(cls_id)]
             counts[name] = counts.get(name, 0) + 1
@@ -48,17 +44,16 @@ def video_frame_callback(frame):
 
     return av.VideoFrame.from_ndarray(annotated_frame, format="bgr24")
 
-
-# RTC config
 RTC_CONFIGURATION = RTCConfiguration({
     "iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]
 })
+
+# 4. The Streamer (Removed 'async_send')
 webrtc_streamer(
     key="object-detection",
     mode=WebRtcMode.SENDRECV,
     video_frame_callback=video_frame_callback,
-    async_processing=True,
+    async_processing=True, 
     rtc_configuration=RTC_CONFIGURATION,
     media_stream_constraints={"video": True, "audio": False},
-    async_send=True,  
 )
