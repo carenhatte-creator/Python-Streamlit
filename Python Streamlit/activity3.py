@@ -6,7 +6,7 @@ import cv2
 
 @st.cache_resource
 def load_model():
-    # Gamit ang yolov8n.pt (nano) para mabilis ang loading sa cloud
+   
     return YOLO("yolov8n.pt")
 
 model = load_model()
