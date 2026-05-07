@@ -4,6 +4,7 @@ from ultralytics import YOLO
 import av
 import cv2
 
+# Load model once
 @st.cache_resource
 def load_model():
     return YOLO("yolov8n.pt")
@@ -11,15 +12,16 @@ def load_model():
 model = load_model()
 
 st.title("🎥 Live Object Detection & Tracking")
-st.write("Point your camera at objects to identify them in real-time.")
+st.write("Click START and allow camera access.")
 
+# Sa WebRTC, mas stable kung walang heavy logic sa labas
 def video_frame_callback(frame):
     img = frame.to_ndarray(format="bgr24")
 
     results = model(img, conf=0.5, verbose=False, imgsz=320)
-
     annotated_frame = results[0].plot()
 
+    # Count objects
     counts = {}
 
     if results and results[0].boxes is not None:
@@ -29,36 +31,40 @@ def video_frame_callback(frame):
             name = names[int(cls_id)]
             counts[name] = counts.get(name, 0) + 1
 
-    
-        y_offset = 50
+        y_offset = 40
         for name, count in counts.items():
             cv2.putText(
                 annotated_frame,
                 f"{name}: {count}",
                 (20, y_offset),
                 cv2.FONT_HERSHEY_SIMPLEX,
-                0.8,
+                0.7,
                 (0, 255, 0),
                 2
             )
-            y_offset += 30
+            y_offset += 25
 
     return av.VideoFrame.from_ndarray(annotated_frame, format="bgr24")
 
 
+# Better ICE config
 RTC_CONFIGURATION = RTCConfiguration({
     "iceServers": [
-        {"urls": "stun:stun.l.google.com:19302"},
-        {"urls": "stun:stun1.l.google.com:19302"}
+        {"urls": ["stun:stun.l.google.com:19302"]},
+        {"urls": ["stun:stun1.l.google.com:19302"]}
     ]
 })
 
-
+# WebRTC streamer (IMPORTANT FIXES HERE)
 webrtc_streamer(
     key="object-detection",
     mode=WebRtcMode.SENDRECV,
     rtc_configuration=RTC_CONFIGURATION,
     video_frame_callback=video_frame_callback,
-    media_stream_constraints={"video": True, "audio": False},
-    async_processing=True,
+    media_stream_constraints={
+        "video": True,
+        "audio": False
+    },
+
+    async_processing=False,  
 )
