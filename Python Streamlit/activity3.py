@@ -48,10 +48,9 @@ RTC_CONFIGURATION = RTCConfiguration({
 })
 
 webrtc_streamer(
-    key="object-detection-unique", 
-    mode=WebRtcMode.SENDRECV,
-    rtc_configuration=RTC_CONFIGURATION, 
-    video_frame_callback=video_frame_callback,
+    key="object-detection-unique",
+    video_processor_factory=VideoProcessor,
     media_stream_constraints={"video": True, "audio": False},
     async_processing=True,
+    desired_playing_state=True,
 )
